@@ -68,14 +68,14 @@ This approach assumes, that data to be restored is contained in `mysql/data/*.zi
 ### Docker-way:
 We will pull mysql container, run it with `root` user, will pull redis container and run it without any authentication just to keep things simple.
 1. Create a mysql container:
-    * `docker run -d --rm --name mysqltest -e MYSQL_ROOT_PASSWORD=securepassword mysql:5.7.28`
+    * `docker run -d --rm --name mysql_db -e MYSQL_ROOT_PASSWORD=securepassword mysql:5.7.28`
 2. Don't forget to restore data from dump.
 3. Create a redis container:
-    * `docker run -d --rm --name redistest --network=container:mysqltest redis:latest`
+    * `docker run -d --rm --name redistest --network=container:mysql_db redis:latest`
 4. Build container with service inside (from root of this repo):
     * `docker build . -t testdb`
 5. Run container with service:
-    * `docker run -d --rm--network=container:mysqltest --name=testdb testdb -redispwd="" -mysqlpwd="securepassword"`
+    * `docker run -d --rm--network=container:mysql_db --name=testdb testdb -redispwd="" -mysqlpwd="securepassword"`
 
 Those commands will spin a redis container without authentication, mysql container and will create a container with the service,
 building it from source code and will spin that container with the service inside, providing same network namespace as
@@ -93,10 +93,14 @@ Also you can use precompiled container ([this one](https://hub.docker.com/reposi
 `docker run -d -v $(pwd)/build/config.json:/go/src/app/config.json --network=container:redistest --name testdb coldze/testdb -redispwd="" -mysqlpwd="securepassword""`
 
 ### Sample tests:
-Those commands can be executed both from host and from inside container, but from root of repo (json files are required for post/put methods):
-* Get date: `curl http://<service-container-ip:port>/v1/cab?id=000318C2E3E6381580E5C99910A60668,00377E15077848677B32CE184CE7E871&date=2013-12-03`
-* Wipe cache: `curl -X "DELETE" "http://<service-container-ip:port>/v1/caches"`
-* Delete entry from cache: `curl -X "DELETE" "http://<service-container-ip:port>/v1/cache?id=000318C2E3E6381580E5C99910A60668&date=2013-12-03"`
+* With `curl` from host:
+   * Get date: `curl http://<service-container-ip:port>/v1/cab?id=000318C2E3E6381580E5C99910A60668,00377E15077848677B32CE184CE7E871&date=2013-12-03`
+   * Wipe cache: `curl -X "DELETE" "http://<service-container-ip:port>/v1/caches"`
+   * Delete entry from cache: `curl -X "DELETE" "http://<service-container-ip:port>/v1/cache?id=000318C2E3E6381580E5C99910A60668&date=2013-12-03"`
+* With `curl` inside separate container, if you were following `docker-compose-way` or `docker-way` (in this case you don't need IP of container):
+   * Get date: `docker run --rm --network=container:mysql_db coldze/alpine:curl "http://<service-container-ip:port>/v1/cab?id=000318C2E3E6381580E5C99910A60668,00377E15077848677B32CE184CE7E871&date=2013-12-03"`
+   * Wipe cache: `docker run --rm --network=container:mysql_db coldze/alpine:curl -X "DELETE" "http://<service-container-ip:port>/v1/caches"`
+   * Delete entry from cache: `docker run --rm --network=container:mysql_db coldze/alpine:curl -X "DELETE" "http://<service-container-ip:port>/v1/cache?id=000318C2E3E6381580E5C99910A60668&date=2013-12-03"`
 
 ## How to run unit-tests:
 From root of repo run following command:
