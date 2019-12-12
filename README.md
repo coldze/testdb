@@ -94,9 +94,9 @@ Also you can use precompiled container ([this one](https://hub.docker.com/reposi
 
 ### Sample tests:
 Those commands can be executed both from host and from inside container, but from root of repo (json files are required for post/put methods):
-* GET: `curl -H "autopilotapikey: <your-api-key>" http://<service-container-ip>/v1/contact/<contact-id>`
-* POST: `curl -X "POST" -H "autopilotapikey: <your-api-key>" -H "Content-Type: application/json" -d @test_data/post.json http://<service-container-ip>/v1/contact`
-* PUT: `curl -X "POST" -H "autopilotapikey: <your-api-key>" -H "Content-Type: application/json" -d @test_data/put.json http://<service-container-ip>/v1/contact`
+* Get date: `curl http://<service-container-ip:port>/v1/cab?id=000318C2E3E6381580E5C99910A60668,00377E15077848677B32CE184CE7E871&date=2013-12-03`
+* Wipe cache: `curl -X "DELETE" "http://<service-container-ip:port>/v1/caches"`
+* Delete entry from cache: `curl -X "DELETE" "http://<service-container-ip:port>/v1/cache?id=000318C2E3E6381580E5C99910A60668&date=2013-12-03"`
 
 ## How to run unit-tests:
 From root of repo run following command:
