@@ -1,0 +1,45 @@
+version: '3.7'
+
+x-logging: &default-logging
+  options:
+    max-size: "50m"
+    max-file: "5"
+
+services:
+  mysql_db:
+    container_name: mysql_db
+    image: mysql:5.7.28
+    logging: *default-logging
+    environment:
+      MYSQL_ROOT_PASSWORD: securepassword
+  mysql_db_import:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    volumes:
+      - ./mysql/data:/src/
+    depends_on:
+      - mysql_db
+    command: ["/src/init_db.sh"]
+    logging: *default-logging
+    network_mode: "service:mysql_db"
+    environment:
+      MYSQL_ROOT_PASSWORD: securepassword
+  redis:
+    container_name: redis
+    image: redis:latest
+    logging: *default-logging
+    network_mode: "service:mysql_db"
+  test_app:
+    container_name: test_app
+    build:
+      context: .
+      dockerfile: Dockerfile_compose
+    depends_on:
+      - mysql_db
+    command: ["-mysqlpwd", "securepassword"]
+    logging: *default-logging
+    network_mode: "service:mysql_db"
+    environment:
+      MYSQL_ROOT_PASSWORD: securepassword
+

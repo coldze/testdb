@@ -1,0 +1,17 @@
+{
+  "mysql": {
+    "user": "root",
+    "host": "tcp(127.0.0.1)",
+    "db": "cabs_db"
+  },
+  "cache_ttl_seconds": 600,
+  "redis": {
+    "address": "localhost:6379",
+    "db": 0
+  },
+  "bind": {
+    "ip": "",
+    "port": 80
+  },
+  "app_timeout_seconds": 120
+}
